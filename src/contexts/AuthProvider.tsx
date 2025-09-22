@@ -11,6 +11,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<AppUser | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authReady, setAuthReady] = useState(false);
 
   const fetchUserRole = async (userId: string) => {
     try {
@@ -38,6 +39,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const {
           data: { session },
         } = await supabase.auth.getSession();
+
         setUser(session?.user ?? null);
 
         if (session?.user) {
@@ -47,6 +49,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.error("Error initializing auth:", error);
       } finally {
         setLoading(false);
+        setAuthReady(true);
       }
     };
 
@@ -54,14 +57,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
-
-      if (session?.user) {
-        await fetchUserRole(session.user.id);
-      } else {
-        setUserRole(null);
-      }
+      setAuthReady(true);
     });
 
     return () => subscription.unsubscribe();
@@ -72,9 +70,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       email,
       password,
       options: {
-        data: {
-          full_name: fullName,
-        },
+        data: { full_name: fullName },
       },
     });
 
@@ -99,7 +95,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       email,
       password,
     });
-
     if (error) throw error;
   };
 
@@ -112,6 +107,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     userRole,
     loading,
+    authReady,
     isAuthenticated: !!user,
     isAdmin: userRole === "admin",
     signUp,

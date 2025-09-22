@@ -7,17 +7,25 @@ import { getCursorClasses, CURSOR_STATES } from "../utils/cursorUtils";
 import { blogService } from "../services/blogService";
 import { type Blog } from "../types/index";
 import toast from "react-hot-toast";
+import { useAuth } from "../contexts/useAuth";
+import { useAuthReady } from "../services/useAuthReady";
 
 const Blogs: React.FC = () => {
+  const authReady = useAuthReady();
   const { isDark } = useTheme();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const { user } = useAuth();
 
   useEffect(() => {
+    if (!authReady) {
+      return;
+    }
+
     const fetchBlogs = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
         const data = await blogService.getBlogs();
         setBlogs(data);
       } catch (error) {
@@ -28,7 +36,7 @@ const Blogs: React.FC = () => {
     };
 
     fetchBlogs();
-  }, []);
+  }, [authReady, user]);
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);

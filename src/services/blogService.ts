@@ -11,12 +11,14 @@ import { type Blog, type CreateBlogData } from "../types/index";
 export const blogService = {
   async getBlogs(): Promise<Blog[]> {
     try {
-      const { data, error } = await supabase
+      const response = await supabase
         .from("blogs")
         .select("*")
         .order("created_at", { ascending: false });
 
+      const { data, error } = response;
       if (error) throw error;
+
       return data || [];
     } catch (error) {
       console.error("Error fetching blogs:", error);
