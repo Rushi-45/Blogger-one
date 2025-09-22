@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiX, FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
-import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { getCursorClasses, CURSOR_STATES } from "../utils/cursorUtils";
+import { useAuth } from "../contexts/useAuth";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -30,11 +30,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
     setLoading(true);
 
     try {
-      const { error } = await signIn(formData.email, formData.password);
-      if (!error) {
-        onClose();
-        setFormData({ email: "", password: "" });
-      }
+      await signIn(formData.email, formData.password);
+      onClose();
+      setFormData({ email: "", password: "" });
     } catch (error) {
       console.error("Login error:", error);
     } finally {

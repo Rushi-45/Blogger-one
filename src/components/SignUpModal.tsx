@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiX, FiMail, FiLock, FiUser, FiEye, FiEyeOff } from "react-icons/fi";
-import { useAuth } from "../contexts/AuthContext";
 import { useTheme } from "../contexts/ThemeContext";
 import { getCursorClasses, CURSOR_STATES } from "../utils/cursorUtils";
+import { useAuth } from "../contexts/useAuth";
 
 interface SignUpModalProps {
   isOpen: boolean;
@@ -44,20 +44,14 @@ const SignUpModal: React.FC<SignUpModalProps> = ({
     setLoading(true);
 
     try {
-      const { error } = await signUp(
-        formData.email,
-        formData.password,
-        formData.fullName
-      );
-      if (!error) {
-        onClose();
-        setFormData({
-          fullName: "",
-          email: "",
-          password: "",
-          confirmPassword: "",
-        });
-      }
+      await signUp(formData.email, formData.password, formData.fullName);
+      onClose();
+      setFormData({
+        fullName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
     } catch (error) {
       console.error("Signup error:", error);
     } finally {
